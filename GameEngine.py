@@ -1,4 +1,3 @@
-from logging import error
 import tkinter as tk
 import time
 
