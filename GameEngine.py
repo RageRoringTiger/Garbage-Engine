@@ -1,4 +1,5 @@
 import tkinter as tk
+from PIL import Image,ImageTk
 import time
 
 # VARIABLES FOR SETUP
@@ -26,6 +27,9 @@ def error(text, type="Error"):
 
 # CLASS USED TO CREATED A NEW SPRITE
 class Sprite:
+    """
+    This is a test description.
+    """
     def __init__(self, width, height, **kwargs):
         img = False
         self.width = width
@@ -52,14 +56,16 @@ class Sprite:
         self.x = x
         self.y = y
         self.tk_obj = tk.Frame(root, width=self.width, height=self.height)
-        if self.color:
+        self.tk_obj.place(x=self.x, y=self.y)
+        if hasattr(self, "color"):
             try:
                 self.tk_obj["background"] = self.color
             except:
                 error("Invalid sprite color.", "Sprite Error")
-        elif self.image:
-            pass
-        self.tk_obj.place(x=self.x, y=self.y)
+        if hasattr(self, "image"):
+            img = ImageTk.PhotoImage(Image.open(self.image).resize((self.width, self.height)))
+            self.image_label = tk.Label(self.tk_obj, image=img)
+            self.image_label.pack()
     
     def hide_sprite(self):
         if self.tk_obj:
@@ -69,7 +75,7 @@ class Text:
     def __init__(self):
         pass
 
-# POSSIBLE KWARGS: window_width, window_height, window_name, window_icon, frame_rate
+# POSSIBLE KWARGS: window_width, window_height, window_name, window_icon, frame_rate, resize_x, resize_y
 def setup(**kwargs):
     global frame_rate, game_setup
     if "frame_rate" in kwargs:
@@ -103,11 +109,22 @@ def setup(**kwargs):
         window_height = 500
 
     root.geometry(f"{window_width}x{window_height}")
+    
+    resize_x = True
+    resize_y = True
+
+    if "resize_x" in kwargs:
+        resize_x = kwargs.get("reize_x")
+
+    if "resize_y" in kwargs:
+        resize_y = kwargs.get("resize_y")
+
+    root.resizable(resize_x, resize_y)
+
     main_frame = tk.Frame(root)
     main_frame.pack()
 
     game_setup = True
-    
 
 def main_loop():
     global game_setup, frame_rate, frame, continue_running, root
