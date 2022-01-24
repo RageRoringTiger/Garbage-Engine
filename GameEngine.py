@@ -85,7 +85,7 @@ def setup(**kwargs):
     root = tk.Tk()
 
     if "window_name" in kwargs:
-        root.title("window_name")
+        root.title(kwargs.get("window_name"))
     else:
         root.title("Game")
     
