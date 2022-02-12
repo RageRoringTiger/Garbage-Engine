@@ -56,7 +56,6 @@ class Sprite:
         self.x = x
         self.y = y
         self.tk_obj = tk.Frame(root, width=self.width, height=self.height)
-        self.tk_obj.place(x=self.x, y=self.y)
         if hasattr(self, "color"):
             try:
                 self.tk_obj["background"] = self.color
@@ -66,6 +65,8 @@ class Sprite:
             img = ImageTk.PhotoImage(Image.open(self.image).resize((self.width, self.height)))
             self.image_label = tk.Label(self.tk_obj, image=img)
             self.image_label.pack()
+        
+        self.tk_obj.place(x=self.x, y=self.y)
     
     def hide_sprite(self):
         if self.tk_obj:
@@ -123,6 +124,10 @@ def setup(**kwargs):
 
     main_frame = tk.Frame(root)
     main_frame.pack()
+
+    #image = ImageTk.PhotoImage(Image.open("test_image.jpg"))
+    panel = tk.Label(root, image=tk.PhotoImage(file="Default-Icon.png"))
+    panel.pack()
 
     game_setup = True
 
