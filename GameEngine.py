@@ -62,8 +62,8 @@ class Sprite:
             except:
                 error("Invalid sprite color.", "Sprite Error")
         if hasattr(self, "image"):
-            img = ImageTk.PhotoImage(Image.open(self.image).resize((self.width, self.height)))
-            self.image_label = tk.Label(self.tk_obj, image=img)
+            self.img = ImageTk.PhotoImage(Image.open(self.image).resize((self.width, self.height)))
+            self.image_label = tk.Label(self.tk_obj, image=self.img)
             self.image_label.pack()
         
         self.tk_obj.place(x=self.x, y=self.y)
