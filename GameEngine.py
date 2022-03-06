@@ -10,6 +10,11 @@ continue_running = True
 frame_rate = (1/30)
 frame = 0
 
+# VARIABLES FOR STORAGE
+sprites = []
+gui = []
+keys = []
+
 # CLASSES AND FUNCTIONS FOR INTERNAL USE
 class terminal_colors:
     black = u"\u001b[30m "
@@ -25,12 +30,21 @@ class terminal_colors:
 def error(text, type="Error"):
     raise Exception(terminal_colors.red + f"[{type}]" + terminal_colors.yellow + text + terminal_colors.reset)
 
+def check_for_root():
+    global root
+    try:
+        if not root:
+            pass
+    except:
+        error("The game must be setup before drawing a sprite.", "Sprite Error")
+
 # CLASS USED TO CREATED A NEW SPRITE
 class Sprite:
     """
     This is a test description.
     """
     def __init__(self, width, height, **kwargs):
+        global sprites
         img = False
         self.width = width
         self.height = height
@@ -38,21 +52,18 @@ class Sprite:
             img = True
             self.image=kwargs.get("image")
         if "color" in kwargs:
-            if img:
-                error("A sprite cannot have both an image and a color.", "Sprite Error")
+            # if img:
+                # error("A sprite cannot have both an image and a color.", "Sprite Error")
             img = True
             self.color = kwargs.get("color")
         
         if not img:
             error("A sprite must have either an image or color.", "Sprite Error")
+
+        sprites.append(self)
     
     def draw_sprite(self, x, y):
-        global root
-        try:
-            if not root:
-                pass
-        except:
-            error("The game must be setup before drawing a sprite.", "Sprite Error")
+        check_for_root()
         self.x = x
         self.y = y
         self.tk_obj = tk.Frame(root, width=self.width, height=self.height)
@@ -72,9 +83,38 @@ class Sprite:
         if self.tk_obj:
             self.tk_obj.place_forget()
 
-class Text:
+    def move_sprite(self, x, y):
+        self.x = x
+        self.y = y
+        self.hide_sprite()
+        self.draw_sprite(self.x, self.y)
+
+
+class Gui:
     def __init__(self):
         pass
+
+    class Text:
+        def __init__(self, text, x=0, y=0, font_size=10, font="Arial", color="#000000"):
+            global root
+            check_for_root()
+            print(self, text, str(x), str(y), str(font_size), color)
+            self.tk_obj = tk.Label(root, text=text, height=font_size, fg=color, font=(font, font_size))
+            self.x = x
+            self.y = y
+            self.tk_obj.place(x=self.x, y=self.y)
+
+class KeyPress:
+    def __init__(self, char, func):
+        global keys
+        check_for_root()
+        keys.append(self)
+        self.char = char
+        self.func = func
+    
+    def runFunction(self):
+        self.func()
+        
 
 # POSSIBLE KWARGS: window_width, window_height, window_name, window_icon, frame_rate, resize_x, resize_y
 def setup(**kwargs):
@@ -122,12 +162,17 @@ def setup(**kwargs):
 
     root.resizable(resize_x, resize_y)
 
+    def key_pressed(event):
+        global keys
+        char = event.char
+        for key in keys:
+            if key.char == event.char:
+                key.runFunction()
+
+    root.bind("<Key>", key_pressed)
+
     main_frame = tk.Frame(root)
     main_frame.pack()
-
-    #image = ImageTk.PhotoImage(Image.open("test_image.jpg"))
-    panel = tk.Label(root, image=tk.PhotoImage(file="Default-Icon.png"))
-    panel.pack()
 
     game_setup = True
 
@@ -137,14 +182,23 @@ def main_loop():
         error("Game not setup. Please use the 'setup()' method.", "Setup Error")
     while continue_running:
         frame += 1
-        root.update_idletasks()
-        root.update()
+        try:
+            root.update_idletasks()
+            root.update()
+        except:
+            closeGame()
         time.sleep(frame_rate)
 
 def update():
-    global game_setup, frame, root
+    global game_setup, frame, root, sprites
     if not game_setup:
         error("Game not setup. Please use the 'setup()' method.", "Setup Error")
     frame += 1
-    root.update_idletasks()
-    root.update()
+    try:
+        root.update_idletasks()
+        root.update()
+    except:
+        closeGame()
+
+def closeGame():
+    root.destroy()
